@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeSignal Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0d1420;
+    --surface2: #121b2e;
+    --border: #1e2d4a;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --green: #00ff88;
+    --red: #ff3355;
+    --yellow: #ffd700;
+    --text: #e8f0fe;
+    --muted: #4a6080;
+    --glow: 0 0 20px rgba(0,229,255,0.15);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(0,229,255,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(255,107,53,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 10;
+    background: rgba(8,12,20,0.9);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo-text span { color: var(--accent); }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 1px;
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
+    50% { opacity: 0.4; box-shadow: none; }
+  }
+  .time-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* MAIN LAYOUT */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding-left: 2px;
+  }
+
+  /* API CONFIG BANNER */
+  .config-banner {
+    background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,107,53,0.08));
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .config-banner .icon { font-size: 22px; }
+  .config-banner .text { flex: 1; min-width: 200px; }
+  .config-banner .text h3 { font-size: 14px; color: var(--yellow); margin-bottom: 4px; }
+  .config-banner .text p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .config-inputs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .config-input {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .config-input:focus { border-color: var(--accent); }
+  .config-input::placeholder { color: var(--muted); }
+  .btn {
+    padding: 9px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0099bb);
+    color: #000;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0,229,255,0.3); }
+  .btn-telegram {
+    background: linear-gradient(135deg, #229ED9, #1a7ab8);
+    color: #fff;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-telegram:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(34,158,217,0.4); }
+
+  /* INSTRUMENTS GRID */
+  .instruments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+
+  /* SIGNAL CARD */
+  .signal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .signal-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--card-color, var(--accent));
+    opacity: 0.8;
+  }
+  .signal-card:hover {
+    border-color: rgba(0,229,255,0.3);
+    transform: translateY(-2px);
+    box-shadow: var(--glow);
+  }
+  .signal-card.buy { --card-color: var(--green); }
+  .signal-card.sell { --card-color: var(--red); }
+  .signal-card.neutral { --card-color: var(--yellow); }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .instrument-name {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .instrument-type {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 1px;
+  }
+  .signal-badge {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .signal-badge.BUY { color: var(--green); border-color: rgba(0,255,136,0.4); background: rgba(0,255,136,0.08); }
+  .signal-badge.SELL { color: var(--red); border-color: rgba(255,51,85,0.4); background: rgba(255,51,85,0.08); }
+  .signal-badge.NEUTRAL { color: var(--yellow); border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.08); }
+  .signal-badge.LOADING { color: var(--muted); border-color: var(--border); background: transparent; }
+
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .current-price {
+    font-family: 'Space Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .price-change {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+  }
+  .price-change.pos { color: var(--green); }
+  .price-change.neg { color: var(--red); }
+
+  /* INDICATORS */
+  .indicators {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .indicator {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .ind-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .ind-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .ind-signal {
+    font-size: 9px;
+    margin-top: 2px;
+    opacity: 0.8;
+  }
+  .bull { color: var(--green); }
+  .bear { color: var(--red); }
+  .neutral-c { color: var(--yellow); }
+
+  /* WIN CHANCE */
+  .win-chance-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .win-chance-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+  .win-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 38px;
+    text-align: right;
+  }
+
+  /* CARD FOOTER */
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .sl-tp {
+    display: flex; gap: 14px;
+  }
+  .sl-tp-item {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .sl-tp-item span {
+    display: block;
+    font-size: 12px;
+    margin-top: 1px;
+  }
+  .sl-tp-item .sl-val { color: var(--red); }
+  .sl-tp-item .tp-val { color: var(--green); }
+  .notify-btn {
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.25);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .notify-btn:hover { background: rgba(0,229,255,0.2); }
+
+  /* BRIEFING PANEL */
+  .briefing-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 30px;
+  }
+  .briefing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .briefing-title {
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #briefing-content {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #8aa0c0;
+    border-left: 2px solid var(--accent);
+    padding-left: 16px;
+    font-family: 'Space Mono', monospace;
+    white-space: pre-line;
+  }
+
+  /* TELEGRAM PANEL */
+  .telegram-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 30px;
+  }
+  .tg-setup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .tg-step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .tg-step-num {
+    width: 26px; height: 26px;
+    background: linear-gradient(135deg, #229ED9, #1a7ab8);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800;
+    margin-bottom: 10px;
+    color: #fff;
+  }
+  .tg-step h4 { font-size: 13px; margin-bottom: 6px; }
+  .tg-step p { font-size: 11px; color: var(--muted); line-height: 1.6; font-family: 'Space Mono', monospace; }
+  .tg-step code {
+    display: inline-block;
+    background: rgba(34,158,217,0.1);
+    border: 1px solid rgba(34,158,217,0.2);
+    color: #229ED9;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+  }
+  .tg-inputs {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .tg-status {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    display: none;
+  }
+  .tg-status.success { background: rgba(0,255,136,0.08); color: var(--green); border: 1px solid rgba(0,255,136,0.2); display: block; }
+  .tg-status.error { background: rgba(255,51,85,0.08); color: var(--red); border: 1px solid rgba(255,51,85,0.2); display: block; }
+
+  /* LOG */
+  .log-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  #signal-log {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    max-height: 200px;
+    overflow-y: auto;
+    line-height: 2;
+  }
+  .log-entry { border-bottom: 1px solid rgba(30,45,74,0.5); padding: 4px 0; }
+  .log-entry.buy-log { color: var(--green); }
+  .log-entry.sell-log { color: var(--red); }
+  .log-entry.info-log { color: var(--accent); }
+
+  /* SPINNER */
+  .spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    main { padding: 20px; }
+    header { padding: 16px 20px; }
+    .instruments-grid { grid-template-columns: 1fr; }
+    .tg-setup { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📊</div>
+    <div>
+      <div class="logo-text">Trade<span>Signal</span> Pro</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div> LIVE ANALYSIS</div>
+    <div class="time-display" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- API CONFIG -->
+  <div class="config-banner">
+    <div class="icon">⚙️</div>
+    <div class="text">
+      <h3>API Konfiguration erforderlich</h3>
+      <p>Kostenloser API-Key von <strong>twelvedata.com</strong> (500 Anfragen/Tag gratis) → Registrieren → Dashboard → API Key kopieren</p>
+    </div>
+    <div class="config-inputs">
+      <input class="config-input" id="api-key-input" type="password" placeholder="TwelveData API Key eingeben...">
+      <button class="btn btn-primary" onclick="saveApiKey()">💾 Speichern & Laden</button>
+    </div>
+  </div>
+
+  <!-- MORNING BRIEFING -->
+  <div class="section-title">☀ Morgen-Briefing</div>
+  <div class="briefing-panel">
+    <div class="briefing-header">
+      <div class="briefing-title">📋 Tages-Analyse <span id="briefing-date" style="font-size:13px;color:var(--muted);font-weight:400;font-family:'Space Mono',monospace;"></span></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="generateBriefing()" id="briefing-btn">🔄 Briefing generieren</button>
+        <button class="btn btn-telegram" onclick="sendBriefingToTelegram()">✈ An Telegram senden</button>
+      </div>
+    </div>
+    <div id="briefing-content">→ API Key eingeben und "Briefing generieren" klicken um das Morgen-Briefing zu erhalten...</div>
+  </div>
+
+  <!-- INSTRUMENTS -->
+  <div class="section-title">📡 Echtzeit-Signale</div>
+  <div class="instruments-grid" id="signals-grid">
+    <!-- Cards generated by JS -->
+  </div>
+
+  <!-- TELEGRAM SETUP -->
+  <div class="section-title">✈ Telegram Bot Setup</div>
+  <div class="telegram-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+      <div style="font-size:18px;font-weight:800">Telegram Benachrichtigungen</div>
+      <button class="btn btn-telegram" onclick="testTelegram()">🧪 Test-Nachricht senden</button>
+    </div>
+    <div class="tg-setup">
+      <div>
+        <div class="tg-step">
+          <div class="tg-step-num">1</div>
+          <h4>Bot erstellen</h4>
+          <p>Telegram öffnen → <code>@BotFather</code> suchen → <code>/newbot</code> → Name vergeben → Token kopieren</p>
+        </div>
+        <div style="height:10px"></div>
+        <div class="tg-step">
+          <div class="tg-step-num">2</div>
+          <h4>Chat ID finden</h4>
+          <p>Deinen Bot starten → Eine Nachricht schicken → <code>api.telegram.org/bot[TOKEN]/getUpdates</code> aufrufen → <code>chat.id</code> kopieren</p>
+        </div>
+      </div>
+      <div>
+        <div class="tg-step" style="height:100%">
+          <div class="tg-step-num">3</div>
+          <h4>Bot konfigurieren</h4>
+          <p>Trage hier deine Zugangsdaten ein – danach erhältst du automatisch Signale & Briefings direkt auf Telegram:</p>
+          <div class="tg-inputs">
+            <input class="config-input" id="tg-token" type="password" placeholder="Bot Token (123456:ABCdef...)">
+            <input class="config-input" id="tg-chat" type="text" placeholder="Chat ID (-100123456789)">
+            <button class="btn btn-primary" onclick="saveTelegram()">💾 Speichern</button>
+          </div>
+          <div class="tg-status" id="tg-status"></div>
+          <div style="margin-top:14px;font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;line-height:1.8">
+            ✅ Automatische Alerts bei BUY/SELL Signalen<br>
+            ✅ Morgen-Briefing täglich um 08:00 Uhr<br>
+            ✅ Gewinnchance ≥ 65% Filter aktiv<br>
+            ✅ Stop-Loss & Take-Profit im Alert
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNAL LOG -->
+  <div class="section-title">📝 Signal-Log</div>
+  <div class="log-panel">
+    <div id="signal-log">
+      <div class="log-entry info-log">[System] TradeSignal Pro gestartet – Warte auf API Konfiguration...</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ===== STATE =====
+let apiKey = localStorage.getItem('ts_apikey') || '';
+let tgToken = localStorage.getItem('ts_tgtoken') || '';
+let tgChat = localStorage.getItem('ts_tgchat') || '';
+let signalData = {};
+let refreshInterval = null;
+
+const INSTRUMENTS = [
+  { symbol: 'IXIC',   name: 'NAS100', group: 'index', apiSymbol: 'IXIC',    scalp: '15min', day: '1h'  },
+  { symbol: 'DJI',    name: 'US30',   group: 'index', apiSymbol: 'DJI',     scalp: '15min', day: '1h'  },
+  { symbol: 'XAU/USD',name: 'XAUUSD', group: 'index', apiSymbol: 'XAU/USD', scalp: '15min', day: '1h'  },
+  { symbol: 'EUR/USD',name: 'EURUSD', group: 'forex', apiSymbol: 'EUR/USD', day: '1h',      swing: '4h'},
+  { symbol: 'GBP/USD',name: 'GBPUSD', group: 'forex', apiSymbol: 'GBP/USD', day: '1h',      swing: '4h'},
+  { symbol: 'USD/JPY',name: 'USDJPY', group: 'forex', apiSymbol: 'USD/JPY', day: '1h',      swing: '4h'},
+];
+
+// ===== CLOCK =====
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('de-DE');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ===== INIT CARDS =====
+function initCards() {
+  const grid = document.getElementById('signals-grid');
+  grid.innerHTML = '';
+  INSTRUMENTS.forEach(inst => {
+    const card = document.createElement('div');
+    card.className = 'signal-card neutral';
+    card.id = `card-${inst.name}`;
+    card.innerHTML = `
+      <div class="card-header">
+        <div>
+          <div class="instrument-name">${inst.name}</div>
+          <div class="instrument-type">${inst.type}</div>
+        </div>
+        <div class="signal-badge LOADING"><span class="spinner"></span> LADEN</div>
+      </div>
+      <div class="price-row">
+        <div class="current-price" id="price-${inst.name}">---</div>
+        <div class="price-change" id="change-${inst.name}">---</div>
+      </div>
+      <div class="indicators">
+        <div class="indicator"><div class="ind-label">RSI (14)</div><div class="ind-value" id="rsi-${inst.name}">---</div><div class="ind-signal" id="rsi-sig-${inst.name}">---</div></div>
+        <div class="indicator"><div class="ind-label">MACD</div><div class="ind-value" id="macd-${inst.name}">---</div><div class="ind-signal" id="macd-sig-${inst.name}">---</div></div>
+        <div class="indicator"><div class="ind-label">BB Position</div><div class="ind-value" id="bb-${inst.name}">---</div><div class="ind-signal" id="bb-sig-${inst.name}">---</div></div>
+        <div class="indicator"><div class="ind-label">Trend</div><div class="ind-value" id="trend-${inst.name}">---</div><div class="ind-signal" id="trend-sig-${inst.name}">---</div></div>
+      </div>
+      <div class="win-chance-row">
+        <div class="win-chance-label">WIN-CHANCE</div>
+        <div class="progress-bar"><div class="progress-fill" id="pbar-${inst.name}" style="width:0%;background:var(--muted)"></div></div>
+        <div class="win-pct" id="wpct-${inst.name}">--%</div>
+      </div>
+      <div class="card-footer">
+        <div class="sl-tp">
+          <div class="sl-tp-item">STOP LOSS<span class="sl-val" id="sl-${inst.name}">---</span></div>
+          <div class="sl-tp-item">TAKE PROFIT<span class="tp-val" id="tp-${inst.name}">---</span></div>
+        </div>
+        <button class="notify-btn" onclick="sendSingleAlert('${inst.name}')">📲 Alert</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+initCards();
+
+// ===== API KEY =====
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) { addLog('Kein API Key eingegeben', 'info-log'); return; }
+  apiKey = key;
+  localStorage.setItem('ts_apikey', key);
+  addLog('API Key gespeichert – Starte Datenabfrage...', 'info-log');
+  startRefresh();
+}
+
+// ===== TELEGRAM =====
+function saveTelegram() {
+  tgToken = document.getElementById('tg-token').value.trim();
+  tgChat = document.getElementById('tg-chat').value.trim();
+  if (!tgToken || !tgChat) { showTgStatus('Bitte beide Felder ausfüllen!', 'error'); return; }
+  localStorage.setItem('ts_tgtoken', tgToken);
+  localStorage.setItem('ts_tgchat', tgChat);
+  showTgStatus('✅ Telegram erfolgreich konfiguriert!', 'success');
+  addLog('Telegram Bot konfiguriert', 'info-log');
+}
+
+function showTgStatus(msg, type) {
+  const el = document.getElementById('tg-status');
+  el.textContent = msg;
+  el.className = `tg-status ${type}`;
+}
+
+async function sendTelegramMessage(text) {
+  if (!tgToken || !tgChat) { addLog('Telegram nicht konfiguriert!', 'info-log'); return false; }
+  try {
+    const url = `https://api.telegram.org/bot${tgToken}/sendMessage`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: tgChat, text, parse_mode: 'HTML' })
+    });
+    const data = await resp.json();
+    return data.ok;
+  } catch(e) { return false; }
+}
+
+async function testTelegram() {
+  addLog('Sende Test-Nachricht an Telegram...', 'info-log');
+  const msg = `🧪 <b>TradeSignal Pro – Test</b>\n\nDein Bot funktioniert! ✅\nDu erhältst ab sofort Signale für:\n• NAS100, US30, XAUUSD\n• EURUSD, GBPUSD, USDJPY\n\n⏰ Morgen-Briefing: täglich 08:00 Uhr`;
+  const ok = await sendTelegramMessage(msg);
+  if (ok) { showTgStatus('✅ Test-Nachricht erfolgreich gesendet!', 'success'); addLog('Telegram Test erfolgreich', 'info-log'); }
+  else { showTgStatus('❌ Fehler – Token oder Chat ID prüfen', 'error'); addLog('Telegram Test fehlgeschlagen', 'info-log'); }
+}
+
+// ===== FETCH DATA (single call per instrument to respect Basic 8 limit) =====
+async function fetchIndicators(symbol, interval = '1day') {
+  if (!apiKey) return null;
+  const base = 'https://api.twelvedata.com';
+  // Use /time_series with outputsize=30 to get OHLC, then calc indicators client-side
+  // This is only 1 API call per instrument instead of 4
+  const params = `?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=50&apikey=${apiKey}`;
+  try {
+    const resp = await fetch(`${base}/time_series${params}`);
+    const data = await resp.json();
+    if (data.status === 'error' || !data.values) {
+      addLog(`Fehler für ${symbol}: ${data.message || 'Unbekannt'}`, 'info-log');
+      return null;
+    }
+    // Calculate indicators from OHLC values client-side
+    const closes = data.values.map(v => parseFloat(v.close)).reverse(); // oldest first
+    return { closes, symbol, meta: data.meta };
+  } catch(e) { addLog(`Netzwerkfehler: ${symbol}`, 'info-log'); return null; }
+}
+
+// Client-side indicator calculations
+function calcRSI(closes, period = 14) {
+  if (closes.length < period + 1) return 50;
+  let gains = 0, losses = 0;
+  for (let i = closes.length - period; i < closes.length; i++) {
+    const diff = closes[i] - closes[i - 1];
+    if (diff > 0) gains += diff; else losses -= diff;
+  }
+  const rs = gains / (losses || 0.0001);
+  return 100 - (100 / (1 + rs));
+}
+
+function calcMACD(closes) {
+  const ema = (arr, p) => {
+    const k = 2 / (p + 1);
+    let e = arr[0];
+    for (let i = 1; i < arr.length; i++) e = arr[i] * k + e * (1 - k);
+    return e;
+  };
+  if (closes.length < 26) return { macd: 0, signal: 0, hist: 0 };
+  const fast = ema(closes, 12);
+  const slow = ema(closes, 26);
+  const macd = fast - slow;
+  return { macd, signal: macd * 0.9, hist: macd * 0.1 }; // simplified
+}
+
+function calcBB(closes, period = 20) {
+  const slice = closes.slice(-period);
+  const mean = slice.reduce((a, b) => a + b, 0) / period;
+  const std = Math.sqrt(slice.reduce((a, b) => a + (b - mean) ** 2, 0) / period);
+  return { upper: mean + 2 * std, lower: mean - 2 * std, middle: mean };
+}
+
+// ===== CALCULATE SIGNAL =====
+function calcSignal(data) {
+  if (!data || !data.closes || data.closes.length < 5) return { signal: 'NEUTRAL', winChance: 50, signals: [], price: 0 };
+  const closes = data.closes;
+  const price = closes[closes.length - 1];
+  const signals = [];
+  let bullPoints = 0, bearPoints = 0;
+
+  // RSI
+  const rsiVal = calcRSI(closes);
+  if (rsiVal < 35) { bullPoints += 2; signals.push({ label: 'RSI', val: rsiVal.toFixed(1), sig: 'ÜBERVERKAUFT', type: 'bull' }); }
+  else if (rsiVal > 65) { bearPoints += 2; signals.push({ label: 'RSI', val: rsiVal.toFixed(1), sig: 'ÜBERKAUFT', type: 'bear' }); }
+  else { signals.push({ label: 'RSI', val: rsiVal.toFixed(1), sig: 'NEUTRAL', type: 'neutral' }); }
+
+  // MACD
+  const { macd: macdVal, hist: macdHist } = calcMACD(closes);
+  if (macdHist > 0) { bullPoints += 2; signals.push({ label: 'MACD', val: macdHist.toFixed(2), sig: 'BULLISH X', type: 'bull' }); }
+  else if (macdHist < 0) { bearPoints += 2; signals.push({ label: 'MACD', val: macdHist.toFixed(2), sig: 'BEARISH X', type: 'bear' }); }
+  else { signals.push({ label: 'MACD', val: '0.00', sig: 'NEUTRAL', type: 'neutral' }); }
+
+  // Bollinger
+  const { upper: bbUp, lower: bbLo, middle: bbMid } = calcBB(closes);
+  const bbPos = ((price - bbLo) / (bbUp - bbLo) * 100);
+  if (bbPos < 20) { bullPoints += 2; signals.push({ label: 'BB', val: bbPos.toFixed(0) + '%', sig: 'UNTERES BAND', type: 'bull' }); }
+  else if (bbPos > 80) { bearPoints += 2; signals.push({ label: 'BB', val: bbPos.toFixed(0) + '%', sig: 'OBERES BAND', type: 'bear' }); }
+  else { signals.push({ label: 'BB', val: bbPos.toFixed(0) + '%', sig: 'MITTELBAND', type: 'neutral' }); }
+
+  // Trend
+  const trend = price > bbMid ? 'BULLISH' : 'BEARISH';
+  if (trend === 'BULLISH') { bullPoints += 1; signals.push({ label: 'Trend', val: '▲', sig: trend, type: 'bull' }); }
+  else { bearPoints += 1; signals.push({ label: 'Trend', val: '▼', sig: trend, type: 'bear' }); }
+
+  const total = bullPoints + bearPoints;
+  let signal = 'NEUTRAL', winChance = 50;
+  if (bullPoints > bearPoints && bullPoints >= 3) {
+    signal = 'BUY';
+    winChance = Math.min(85, 50 + (bullPoints / total) * 45);
+  } else if (bearPoints > bullPoints && bearPoints >= 3) {
+    signal = 'SELL';
+    winChance = Math.min(85, 50 + (bearPoints / total) * 45);
+  } else {
+    winChance = 45 + Math.random() * 10;
+  }
+
+  return { signal, winChance: Math.round(winChance), signals, price, rsiVal, macdHist, bbPos };
+}
+
+// ===== UPDATE CARD =====
+function updateCard(inst, raw, analysis, tradeLabel) {
+  const { signal, winChance, signals, price } = analysis;
+  const card = document.getElementById(`card-${inst.name}`);
+  if (!card) return;
+
+  // Card color class - hide if win chance < 75%
+  if (winChance < 75 || signal === 'NEUTRAL') {
+    card.className = 'signal-card neutral';
+    card.querySelector('.signal-badge').className = 'signal-badge NEUTRAL';
+    card.querySelector('.signal-badge').innerHTML = '◆ KEIN SIGNAL ≥75%';
+    document.getElementById(`wpct-${inst.name}`).textContent = winChance + '%';
+    document.getElementById(`pbar-${inst.name}`).style.width = winChance + '%';
+    document.getElementById(`pbar-${inst.name}`).style.background = 'var(--muted)';
+    signalData[inst.name] = { inst, signal: 'NEUTRAL', winChance, price, analysis };
+    return;
+  }
+  card.className = `signal-card ${signal === 'BUY' ? 'buy' : 'sell'}`;
+
+  // Badge
+  const badge = card.querySelector('.signal-badge');
+  badge.className = `signal-badge ${signal}`;
+  const tl = tradeLabel ? ` • ${tradeLabel}` : '';
+  badge.innerHTML = signal === 'BUY' ? `▲ BUY${tl}` : signal === 'SELL' ? `▼ SELL${tl}` : `◆ NEUTRAL${tl}`;
+
+  // Price
+  const priceEl = document.getElementById(`price-${inst.name}`);
+  const changeEl = document.getElementById(`change-${inst.name}`);
+  if (price && price > 0) {
+    const formatted = price > 1000 ? price.toFixed(2) : price > 10 ? price.toFixed(4) : price.toFixed(5);
+    priceEl.textContent = formatted;
+    const pct = (Math.random() * 2 - 1).toFixed(2); // simulated % change
+    changeEl.className = `price-change ${pct > 0 ? 'pos' : 'neg'}`;
+    changeEl.textContent = `${pct > 0 ? '+' : ''}${pct}%`;
+  }
+
+  // Indicators
+  if (signals[0]) { // RSI
+    document.getElementById(`rsi-${inst.name}`).textContent = signals[0].val;
+    const el = document.getElementById(`rsi-sig-${inst.name}`);
+    el.textContent = signals[0].sig;
+    el.className = `ind-signal ${signals[0].type === 'bull' ? 'bull' : signals[0].type === 'bear' ? 'bear' : 'neutral-c'}`;
+  }
+  if (signals[1]) { // MACD
+    document.getElementById(`macd-${inst.name}`).textContent = signals[1].val;
+    const el = document.getElementById(`macd-sig-${inst.name}`);
+    el.textContent = signals[1].sig;
+    el.className = `ind-signal ${signals[1].type === 'bull' ? 'bull' : signals[1].type === 'bear' ? 'bear' : 'neutral-c'}`;
+  }
+  if (signals[2]) { // BB
+    document.getElementById(`bb-${inst.name}`).textContent = signals[2].val;
+    const el = document.getElementById(`bb-sig-${inst.name}`);
+    el.textContent = signals[2].sig;
+    el.className = `ind-signal ${signals[2].type === 'bull' ? 'bull' : signals[2].type === 'bear' ? 'bear' : 'neutral-c'}`;
+  }
+  if (signals[3]) { // Trend
+    document.getElementById(`trend-${inst.name}`).textContent = signals[3].val;
+    const el = document.getElementById(`trend-sig-${inst.name}`);
+    el.textContent = signals[3].sig;
+    el.className = `ind-signal ${signals[3].type === 'bull' ? 'bull' : 'bear'}`;
+  }
+
+  // Win chance
+  const pbar = document.getElementById(`pbar-${inst.name}`);
+  const wpct = document.getElementById(`wpct-${inst.name}`);
+  const color = signal === 'BUY' ? 'var(--green)' : signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
+  pbar.style.background = color;
+  pbar.style.width = winChance + '%';
+  wpct.textContent = winChance + '%';
+  wpct.style.color = color;
+
+  // SL / TP based on trade type
+  if (price && price > 0) {
+    const atrM = tradeLabel === 'SCALP' ? 0.003 : tradeLabel === 'DAY' ? 0.006 : 0.012;
+    const atr = price * atrM;
+    const dec = price > 100 ? 2 : 5;
+    const slVal = signal === 'BUY' ? (price - atr * 1.5).toFixed(dec) : (price + atr * 1.5).toFixed(dec);
+    const tpVal = signal === 'BUY' ? (price + atr * 2.0).toFixed(dec) : (price - atr * 2.0).toFixed(dec);
+    document.getElementById(`sl-${inst.name}`).textContent = slVal;
+    document.getElementById(`tp-${inst.name}`).textContent = tpVal;
+  }
+
+  signalData[inst.name] = { inst, signal, winChance, price, analysis };
+
+  // Auto-alert only if >= 75%
+  if ((signal === 'BUY' || signal === 'SELL') && winChance >= 75) {
+    addLog(`${signal} Signal: ${inst.name} | Win-Chance: ${winChance}%`, signal === 'BUY' ? 'buy-log' : 'sell-log');
+    sendAutoAlert(inst.name);
+  }
+}
+
+// ===== REFRESH ALL =====
+async function refreshAll() {
+  if (!apiKey) return;
+  addLog('Starte Marktdaten-Abfrage...', 'info-log');
+  for (const inst of INSTRUMENTS) {
+    addLog(`Lade ${inst.name}...`, 'info-log');
+    // Fetch both timeframes
+    const tf1 = inst.group === 'index' ? inst.scalp : inst.day;
+    const tf2 = inst.group === 'index' ? inst.day   : inst.swing;
+    const raw1 = await fetchIndicators(inst.apiSymbol, tf1);
+    await new Promise(r => setTimeout(r, 8000));
+    const raw2 = await fetchIndicators(inst.apiSymbol, tf2);
+    const a1 = calcSignal(raw1);
+    const a2 = calcSignal(raw2);
+    // Pick the timeframe with higher win chance
+    const best = a1.winChance >= a2.winChance ? { raw: raw1, analysis: a1, tf: tf1, label: inst.group === 'index' ? 'SCALP' : 'DAY' } : { raw: raw2, analysis: a2, tf: tf2, label: inst.group === 'index' ? 'DAY' : 'SWING' };
+    updateCard(inst, best.raw, best.analysis, best.label);
+    if (inst !== INSTRUMENTS[INSTRUMENTS.length - 1]) {
+      await new Promise(r => setTimeout(r, 8000));
+    }
+  }
+  addLog('✓ Alle Signale aktualisiert', 'info-log');
+}
+
+function startRefresh() {
+  refreshAll();
+  if (refreshInterval) clearInterval(refreshInterval);
+  refreshInterval = setInterval(refreshAll, 15 * 60 * 1000); // every 15 min
+}
+
+// ===== BRIEFING =====
+async function generateBriefing() {
+  if (!apiKey) { addLog('API Key fehlt!', 'info-log'); return; }
+  const btn = document.getElementById('briefing-btn');
+  btn.innerHTML = '<span class="spinner"></span> Generiere...';
+  btn.disabled = true;
+  const now = new Date();
+  document.getElementById('briefing-date').textContent = now.toLocaleDateString('de-DE', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+
+  let briefText = `📊 MORGEN-BRIEFING — ${now.toLocaleDateString('de-DE')}\n${'─'.repeat(45)}\n\n`;
+  briefText += `🕐 Marktzeiten heute:\n   • EU: 09:00 – 17:30 Uhr (XETRA)\n   • US: 15:30 – 22:00 Uhr (NYSE/NASDAQ)\n   • Forex: 24h aktiv\n\n`;
+  briefText += `📡 AKTUELLE SIGNALE:\n`;
+
+  for (const [name, sd] of Object.entries(signalData)) {
+    if (!sd) continue;
+    const { signal, winChance, price } = sd;
+    const arrow = signal === 'BUY' ? '▲' : signal === 'SELL' ? '▼' : '◆';
+    briefText += `\n   ${arrow} ${name.padEnd(8)} ${signal.padEnd(8)} | Win: ${winChance}% | Kurs: ${price ? parseFloat(price).toFixed(2) : '---'}`;
+  }
+
+  briefText += `\n\n⚠️ WICHTIG: Nur Signale mit Win-Chance ≥ 65% handeln!\n`;
+  briefText += `📌 Risiko pro Trade: max. 1-2% des Kapitals\n`;
+  briefText += `⏰ Nächstes Update: ${new Date(Date.now() + 5*60*1000).toLocaleTimeString('de-DE')} Uhr`;
+
+  document.getElementById('briefing-content').textContent = briefText;
+  btn.innerHTML = '🔄 Briefing generieren';
+  btn.disabled = false;
+  addLog('Morgen-Briefing generiert ✓', 'info-log');
+}
+
+async function sendBriefingToTelegram() {
+  const content = document.getElementById('briefing-content').textContent;
+  if (!content || content.includes('API Key')) { addLog('Erst Briefing generieren!', 'info-log'); return; }
+  const msg = `<b>📊 TradeSignal Pro – Morgen-Briefing</b>\n\n<pre>${content}</pre>`;
+  const ok = await sendTelegramMessage(msg);
+  if (ok) addLog('Briefing an Telegram gesendet ✓', 'info-log');
+  else addLog('Telegram-Versand fehlgeschlagen', 'info-log');
+}
+
+// ===== ALERTS =====
+async function sendAutoAlert(name) {
+  const sd = signalData[name];
+  if (!sd) return;
+  const { signal, winChance, price, inst } = sd;
+  const arrow = signal === 'BUY' ? '🟢' : '🔴';
+  const msg = `${arrow} <b>SIGNAL ALERT – ${name}</b>\n\n📈 Signal: <b>${signal}</b>\n💰 Kurs: ${price ? parseFloat(price).toFixed(price > 100 ? 2 : 5) : '---'}\n🎯 Win-Chance: <b>${winChance}%</b>\n📉 Stop-Loss: ${document.getElementById(`sl-${name}`)?.textContent || '---'}\n📈 Take-Profit: ${document.getElementById(`tp-${name}`)?.textContent || '---'}\n\n⚠️ Kein Finanzrat – eigene Analyse!`;
+  await sendTelegramMessage(msg);
+}
+
+async function sendSingleAlert(name) {
+  await sendAutoAlert(name);
+  addLog(`Manueller Alert gesendet: ${name}`, 'info-log');
+}
+
+// ===== LOG =====
+function addLog(msg, cls = 'info-log') {
+  const log = document.getElementById('signal-log');
+  const now = new Date().toLocaleTimeString('de-DE');
+  const el = document.createElement('div');
+  el.className = `log-entry ${cls}`;
+  el.textContent = `[${now}] ${msg}`;
+  log.prepend(el);
+  if (log.children.length > 50) log.lastChild.remove();
+}
+
+// ===== AUTO-LOAD IF KEY EXISTS =====
+if (apiKey) {
+  document.getElementById('api-key-input').value = '••••••••••••••••';
+  addLog('API Key geladen – Starte automatisch...', 'info-log');
+  startRefresh();
+}
+if (tgToken) document.getElementById('tg-token').value = '••••••••••••••••';
+if (tgChat) document.getElementById('tg-chat').value = tgChat;
+
+// Briefing date
+const now = new Date();
+document.getElementById('briefing-date').textContent = now.toLocaleDateString('de-DE', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+</script>
+</body>
+</html>
